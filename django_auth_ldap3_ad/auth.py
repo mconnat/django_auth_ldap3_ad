@@ -243,6 +243,11 @@ class LDAP3ADBackend(object):
 
                                 logger.info("AUDIT LOGIN FOR: %s AT %s DETECTED IN GROUP %s" %
                                             (username, datetime.now(), resp['dn']))
+                                                                # deny unauthorized group
+                                if settings.LDAP_GROUP_ACCESS is not None:
+                                    if resp.get('attributes').get('cn') is not None and resp.get('attributes').get('cn') not in settings.LDAP_GROUP_ACCESS:
+                                        logger.info("AUDIT LOGIN FOR: {} AT {} DENIED LOGIN CAUSE MEMBER OF GROUP {}".format(username, datetime.now(), resp.get('attributes').get('cn')))
+                                        return None
                                 # special super user group
                                 if alter_superuser_membership:
                                     if resp['dn'] in settings.LDAP_SUPERUSER_GROUPS:
